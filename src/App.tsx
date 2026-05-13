@@ -4,7 +4,7 @@ import {
   ChevronLeft, 
   ArrowRight
 } from 'lucide-react';
-import { Article, Book, Theme } from './types';
+import { Article, Book, Theme, FontFamily } from './types';
 import { LibraryHeader } from './components/LibraryHeader';
 import { ReaderSidebar } from './components/ReaderSidebar';
 import { ReaderHeader } from './components/ReaderHeader';
@@ -21,6 +21,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [theme, setTheme] = useState<Theme>('sepia');
+  const [fontFamily, setFontFamily] = useState<FontFamily>('serif');
   const [fontSize, setFontSize] = useState(18);
   const [showSettings, setShowSettings] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -462,57 +463,61 @@ export default function App() {
             />
 
             {/* Top Navigation Bar */}
-            <ReaderHeader 
-              onBack={() => {
-                setSelectedArticle(null);
-                stopAudio();
-              }}
-              isSidebarOpen={isSidebarOpen}
-              toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-              isPlaying={isPlaying}
-              isPaused={isPaused}
-              onToggleAudio={toggleAudio}
-              showSettings={showSettings}
-              setShowSettings={setShowSettings}
-              isBookmarked={selectedArticle ? bookmarks.includes(selectedArticle.id) : false}
-              onToggleBookmark={() => {
-                if (!selectedArticle) return;
-                if (bookmarks.includes(selectedArticle.id)) {
-                  setBookmarks(bookmarks.filter(id => id !== selectedArticle.id));
-                } else {
-                  setBookmarks([...bookmarks, selectedArticle.id]);
-                }
-              }}
-              onShare={async () => {
-                if (!selectedArticle) return;
-                if (navigator.share) {
-                  try {
-                    await navigator.share({
-                      title: selectedArticle.title,
-                      text: selectedArticle.excerpt,
-                      url: window.location.href,
-                    });
-                  } catch (err) {
-                    console.error('Error sharing:', err);
+            <div className="sticky top-0 z-50">
+              <ReaderHeader 
+                onBack={() => {
+                  setSelectedArticle(null);
+                  stopAudio();
+                }}
+                isSidebarOpen={isSidebarOpen}
+                toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+                isPlaying={isPlaying}
+                isPaused={isPaused}
+                onToggleAudio={toggleAudio}
+                showSettings={showSettings}
+                setShowSettings={setShowSettings}
+                isBookmarked={selectedArticle ? bookmarks.includes(selectedArticle.id) : false}
+                onToggleBookmark={() => {
+                  if (!selectedArticle) return;
+                  if (bookmarks.includes(selectedArticle.id)) {
+                    setBookmarks(bookmarks.filter(id => id !== selectedArticle.id));
+                  } else {
+                    setBookmarks([...bookmarks, selectedArticle.id]);
                   }
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Link berhasil disalin ke clipboard!');
-                }
-              }}
-              theme={theme}
-            />
+                }}
+                onShare={async () => {
+                  if (!selectedArticle) return;
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({
+                        title: selectedArticle.title,
+                        text: selectedArticle.excerpt,
+                        url: window.location.href,
+                      });
+                    } catch (err) {
+                      console.error('Error sharing:', err);
+                    }
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert('Link berhasil disalin ke clipboard!');
+                  }
+                }}
+                theme={theme}
+              />
 
-            <AnimatePresence>
-              {showSettings && (
-                <ReaderSettings 
-                  theme={theme}
-                  setTheme={setTheme}
-                  fontSize={fontSize}
-                  setFontSize={setFontSize}
-                />
-              )}
-            </AnimatePresence>
+              <AnimatePresence>
+                {showSettings && (
+                  <ReaderSettings 
+                    theme={theme}
+                    setTheme={setTheme}
+                    fontSize={fontSize}
+                    setFontSize={setFontSize}
+                    fontFamily={fontFamily}
+                    setFontFamily={setFontFamily}
+                  />
+                )}
+              </AnimatePresence>
+            </div>
 
             <div className="max-w-[1400px] mx-auto flex gap-10">
               {/* Sidebar (Desktop and Mobile) */}
@@ -536,6 +541,7 @@ export default function App() {
                   selectedArticle={selectedArticle}
                   selectedBook={selectedBook}
                   fontSize={fontSize}
+                  fontFamily={fontFamily}
                   contentRef={contentRef}
                   activeParagraphIndex={activeParagraphIndex}
                   articles={articles}

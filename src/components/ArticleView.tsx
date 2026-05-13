@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Article, Book } from '../types';
+import { Article, Book, FontFamily } from '../types';
 import { ReaderFooter } from './ReaderFooter';
 
 interface ArticleViewProps {
   selectedArticle: Article;
   selectedBook: Book | null;
   fontSize: number;
+  fontFamily: FontFamily;
   contentRef: React.RefObject<HTMLDivElement>;
   activeParagraphIndex: number | null;
   articles: Article[];
@@ -19,6 +20,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   selectedArticle,
   selectedBook,
   fontSize,
+  fontFamily,
   contentRef,
   activeParagraphIndex,
   articles,
@@ -26,6 +28,12 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   goToNextArticle,
   onFinish
 }) => {
+  const fontClasses = {
+    sans: 'font-sans',
+    serif: 'font-serif',
+    mono: 'font-mono'
+  };
+
   return (
     <main className="flex-1 w-full max-w-2xl mx-auto px-6 py-24 pb-48">
       {selectedArticle.image && (
@@ -47,7 +55,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           <span className="inline-block text-[10px] uppercase tracking-[0.4em] font-black text-accent-gold mb-4 block">
             {selectedBook?.name}
           </span>
-          <h1 className="text-5xl md:text-7xl font-display font-medium leading-[1.1] mb-10 tracking-tight text-current">
+          <h1 className={`text-5xl md:text-7xl font-display font-medium leading-[1.1] mb-10 tracking-tight text-current ${fontClasses[fontFamily]}`}>
             {selectedArticle.title}
           </h1>
           <div className="flex items-center justify-center flex-wrap gap-x-6 gap-y-3 text-sm opacity-40 font-bold uppercase tracking-[0.2em]">
@@ -58,7 +66,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
       <div 
         ref={contentRef}
-        className="markdown-body transition-all duration-300 drop-cap"
+        className={`markdown-body transition-all duration-300 drop-cap ${fontClasses[fontFamily]}`}
         style={{ fontSize: `${fontSize}px` }}
         dangerouslySetInnerHTML={{ __html: selectedArticle.content }}
       />

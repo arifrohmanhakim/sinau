@@ -23,3 +23,4 @@ export interface Book {
 }
 
 export type Theme = 'light' | 'sepia' | 'dark';
+export type FontFamily = 'sans' | 'serif' | 'mono';
