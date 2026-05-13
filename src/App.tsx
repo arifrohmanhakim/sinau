@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   BookOpen, 
@@ -57,9 +57,9 @@ export default function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [activeParagraphIndex, setActiveParagraphIndex] = useState<number | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('Semua');
-  const [muallifFilter, setMuallifFilter] = useState<string>('Semua');
   const [showQuickTOC, setShowQuickTOC] = useState(false);
-  const [filterMode, setFilterMode] = useState<'kategori' | 'muallif' | 'bookmarks'>('kategori');
+  
+  // Storage for bookmarks and scroll positions
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
     const saved = localStorage.getItem('ilmiyyah_bookmarks');
     return saved ? JSON.parse(saved) : [];
@@ -68,6 +68,14 @@ export default function App() {
     const saved = localStorage.getItem('ilmiyyah_book_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Reset active paragraph when changing article
+  useEffect(() => {
+    setActiveParagraphIndex(null);
+    stopAudio();
+  }, [selectedArticle]);
 
   // Save bookmarks to localStorage
   useEffect(() => {
@@ -207,14 +215,14 @@ export default function App() {
   }, [selectedBook]);
 
   useEffect(() => {
-    const container = document.querySelector('.markdown-body');
+    const container = contentRef.current;
     if (selectedArticle && container) {
       const handleClick = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
         const p = target.closest('p');
         // Ensure it's a paragraph inside our content
         if (p && p.closest('.markdown-body')) {
-          const paragraphs = Array.from(document.querySelectorAll('.markdown-body p'));
+          const paragraphs = Array.from(container.querySelectorAll('p'));
           const index = paragraphs.indexOf(p);
           if (index !== -1) {
             readFromParagraph(index);
@@ -262,27 +270,19 @@ export default function App() {
     }
   }, [selectedArticle]);
 
-  const categories = ["Semua", "Aqidah", "Ibadah", "Adab", "Silsilah", "Kitab", "Bahasa Arab", "Ramadhan"];
-  const muallifs = ["Semua", ...new Set(books.map(b => b.muallif).filter(m => m !== "Ilmiyyah"))];
+  const categories = ["Semua", "Pilihan", "Aqidah", "Ibadah", "Adab", "Silsilah", "Kitab", "Bahasa Arab", "Ramadhan"];
 
   const filteredBooks = books.filter(b => {
-    const matchesSearch = b.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = b.name.toLowerCase().includes(query) || b.muallif.toLowerCase().includes(query);
     const isUseful = b.count > 0 && b.slug !== 'uncategorized' && b.slug !== 'e-book';
     
-    if (filterMode === 'bookmarks') {
-      return bookmarks.includes(b.id) && matchesSearch;
-    }
-
-    if (filterMode === 'muallif') {
-      if (muallifFilter === 'Semua') return matchesSearch && isUseful;
-      return matchesSearch && isUseful && b.muallif === muallifFilter;
-    }
-
+    if (categoryFilter === 'Pilihan') return matchesSearch && isUseful && bookBookmarks.includes(b.id);
     if (categoryFilter === 'Semua') return matchesSearch && isUseful;
     
     // Simple mapping logic for categories
-    if (categoryFilter === 'Silsilah') return matchesSearch && isUseful && b.name.includes('Silsilah');
-    if (categoryFilter === 'Kitab') return matchesSearch && isUseful && b.name.includes('Kitab');
+    if (categoryFilter === 'Silsilah') return matchesSearch && isUseful && (b.name.includes('Silsilah') || b.slug.includes('silsilah'));
+    if (categoryFilter === 'Kitab') return matchesSearch && isUseful && (b.name.includes('Kitab') || b.slug.includes('kitab'));
     if (categoryFilter === 'Aqidah') return matchesSearch && isUseful && (b.name.includes('Aqidah') || b.name.includes('Tauhid'));
     
     return matchesSearch && isUseful && b.name.includes(categoryFilter);
@@ -372,25 +372,9 @@ export default function App() {
                 />
               </div>
 
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-6 border-b border-current/10 mb-6">
-                {(['kategori', 'muallif', 'bookmarks'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setFilterMode(mode)}
-                    className={`pb-4 text-xs font-black uppercase tracking-widest transition-all relative ${filterMode === mode ? 'text-accent-gold' : 'opacity-30 hover:opacity-100'}`}
-                  >
-                    {mode}
-                    {filterMode === mode && (
-                      <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-1 bg-accent-gold rounded-full" />
-                    )}
-                  </button>
-                ))}
-              </div>
-
               {/* Specific Filter Pills */}
-              <div className="flex items-center gap-3 overflow-x-auto py-4 no-scrollbar">
-                {filterMode === 'kategori' && categories.map((cat) => (
+              <div className="flex items-center gap-3 overflow-x-auto py-6 no-scrollbar">
+                {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setCategoryFilter(cat)}
@@ -399,20 +383,6 @@ export default function App() {
                     {cat}
                   </button>
                 ))}
-                {filterMode === 'muallif' && muallifs.map((mua) => (
-                  <button
-                    key={mua}
-                    onClick={() => setMuallifFilter(mua)}
-                    className={`category-pill ${muallifFilter === mua ? 'active' : ''}`}
-                  >
-                    {mua}
-                  </button>
-                ))}
-                {filterMode === 'bookmarks' && (
-                  <div className="text-xs font-bold opacity-40 py-2 italic font-serif">
-                    Kitab-kitab yang Anda tandai akan muncul di sini.
-                  </div>
-                )}
               </div>
             </header>
 
@@ -725,7 +695,7 @@ export default function App() {
                               setShowQuickTOC(false);
                               stopAudio();
                             }}
-                            className={`w-full text-left p-4 rounded-xl text-sm transition-all border ${selectedArticle.id === art.id ? 'bg-accent-gold text-black border-accent-gold' : 'border-transparent hover:bg-current/5'}`}
+                            className={`w-full text-left p-4 rounded-xl text-sm transition-all border ${selectedArticle?.id?.toString() === art.id.toString() ? 'bg-accent-gold text-black border-accent-gold' : 'border-transparent hover:bg-current/5'}`}
                           >
                             <div className="opacity-40 text-[10px] font-black uppercase tracking-widest mb-1">Bab {(idx + 1).toString().padStart(2, '0')}</div>
                             <div className="font-bold leading-tight">{art.title}</div>
@@ -826,6 +796,7 @@ export default function App() {
               </header>
 
               <div 
+                ref={contentRef}
                 className="markdown-body transition-all duration-300 drop-cap"
                 style={{ fontSize: `${fontSize}px` }}
                 dangerouslySetInnerHTML={{ __html: selectedArticle.content }}

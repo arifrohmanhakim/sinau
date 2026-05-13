@@ -12,26 +12,23 @@ async function startServer() {
   app.get("/api/books", async (req, res) => {
     try {
       const response = await axios.get("https://ilmiyyah.com/wp-json/wp/v2/categories?per_page=100&hide_empty=true");
-      
-      // Fetch 100 posts to build a better cover map
-      const latestPosts = await axios.get("https://ilmiyyah.com/wp-json/wp/v2/posts?_embed&per_page=100");
-      const categoryCovers: Record<string, string> = {};
-      
-      latestPosts.data.forEach((post: any) => {
-        const image = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
-        if (image) {
-          post.categories.forEach((catId: number) => {
-            if (!categoryCovers[catId]) categoryCovers[catId] = image;
-          });
-        }
-      });
+      const categories = response.data;
 
-      const books = response.data.map((cat: any) => {
+      // Fetch featured images for these categories by looking at one post per category
+      // We do this in parallel for efficiency
+      const covers: Record<string, string> = {};
+      
+      const books = categories.map((cat: any) => {
         const name = he.decode(cat.name);
+        
+        // Better Muallif (Author) extraction from category name
         let muallif = "Ilmiyyah";
         if (name.includes("Syaikh")) {
-          const match = name.match(/Syaikh [a-zA-Z\s]+(?=\s|-|$)/);
-          if (match) muallif = match[0];
+          const authorParts = name.match(/Syaikh\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/);
+          if (authorParts) muallif = authorParts[0];
+        } else if (name.includes("Ustadz")) {
+          const authorParts = name.match(/Ustadz\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/);
+          if (authorParts) muallif = authorParts[0];
         }
 
         return {
@@ -41,11 +38,35 @@ async function startServer() {
           count: cat.count,
           parent: cat.parent.toString(),
           description: he.decode(cat.description || ""),
-          coverColor: `hsl(${Math.abs(cat.slug.split('').reduce((a:any,b:any)=>a+b.charCodeAt(0),0)) % 360}, 40%, 45%)`,
-          image: categoryCovers[cat.id] || null,
+          coverColor: `hsl(${Math.abs(cat.slug.split('').reduce((a:any,b:any)=>a+b.charCodeAt(0),0)) % 360}, 30%, 40%)`,
+          image: null,
           muallif: muallif
         };
       });
+
+      // Try to fetch covers for the most popular books
+      const topBooks = books.filter((b: any) => b.count > 5).slice(0, 20);
+      try {
+        const postPromises = topBooks.map((b: any) => 
+          axios.get(`https://ilmiyyah.com/wp-json/wp/v2/posts?categories=${b.id}&per_page=1&_embed`)
+        );
+        const postResults = await Promise.allSettled(postPromises);
+        
+        postResults.forEach((result, idx) => {
+          if (result.status === 'fulfilled' && result.value.data.length > 0) {
+            const post = result.value.data[0];
+            const img = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+            if (img) {
+              const bookId = topBooks[idx].id;
+              const book = books.find((b: any) => b.id === bookId);
+              if (book) book.image = img;
+            }
+          }
+        });
+      } catch (e) {
+        console.error("Error fetching covers:", e);
+      }
+
       res.json(books);
     } catch (error) {
       console.error("Error fetching books:", error);
