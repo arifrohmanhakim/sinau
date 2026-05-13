@@ -27,11 +27,11 @@ export const LibraryHeader: React.FC<LibraryHeaderProps> = ({
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-accent-gold to-[#aa8c2e] rounded-xl flex items-center justify-center text-black font-black text-sm uppercase tracking-tighter shadow-xl shadow-accent-gold/20">
-            IL
+            SI
           </div>
           <div>
-            <h1 className="text-4xl font-display font-bold">Ilmiyyah <span className="font-normal opacity-40">Library</span></h1>
-            <p className="text-xs uppercase tracking-[0.3em] font-bold opacity-30 mt-1">Edisi Digital & Interaktif</p>
+            <h1 className="text-4xl font-display font-bold">Sinau <span className="font-normal opacity-40">Library</span></h1>
+            <p className="text-xs uppercase tracking-[0.3em] font-bold opacity-30 mt-1">Platform Belajar Digital & Interaktif</p>
           </div>
         </div>
         <div className="flex items-center gap-4">

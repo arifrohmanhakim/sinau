@@ -8,11 +8,35 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Disable caching for all routes
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    next();
+  });
+
   // API Route to fetch categories (Books)
   app.get("/api/books", async (req, res) => {
     try {
+      // Fetch more categories to ensure we get everything
       const response = await axios.get("https://ilmiyyah.com/wp-json/wp/v2/categories?per_page=100&hide_empty=true");
-      const categories = response.data;
+      let categories = response.data;
+
+      // If there's an 'e-book' category, we might want to fetch its subcategories specifically if they are not in the first 100
+      const ebookCat = categories.find((c: any) => c.slug === 'e-book');
+      if (ebookCat) {
+        try {
+          const subResponse = await axios.get(`https://ilmiyyah.com/wp-json/wp/v2/categories?parent=${ebookCat.id}&per_page=100&hide_empty=true`);
+          const subCats = subResponse.data;
+          // Merge unique categories
+          subCats.forEach((sc: any) => {
+            if (!categories.find((c: any) => c.id === sc.id)) {
+              categories.push(sc);
+            }
+          });
+        } catch (e) {
+          console.error("Error fetching subcategories:", e);
+        }
+      }
 
       // Fetch featured images for these categories by looking at one post per category
       // We do this in parallel for efficiency
@@ -22,7 +46,7 @@ async function startServer() {
         const name = he.decode(cat.name);
         
         // Better Muallif (Author) extraction from category name
-        let muallif = "Ilmiyyah";
+        let muallif = "Sinau";
         if (name.includes("Syaikh")) {
           const authorParts = name.match(/Syaikh\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/);
           if (authorParts) muallif = authorParts[0];
@@ -45,7 +69,7 @@ async function startServer() {
       });
 
       // Try to fetch covers for more books
-      const topBooks = books.filter((b: any) => b.count > 0).slice(0, 50);
+      const topBooks = books.filter((b: any) => b.count > 0).slice(0, 150);
       try {
         // Use a smaller batch size to avoid overwhelming the server
         const batchSize = 10;
@@ -87,7 +111,7 @@ async function startServer() {
     try {
       const response = await axios.get(`https://ilmiyyah.com/wp-json/wp/v2/posts?include=${ids}&_embed`);
       const articles = response.data.map((post: any) => {
-        const author = post._embedded?.author?.[0]?.name || "Ilmiyyah";
+        const author = post._embedded?.author?.[0]?.name || "Sinau";
         const featuredImage = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null;
         
         return {
@@ -114,7 +138,7 @@ async function startServer() {
     try {
       const response = await axios.get(`https://ilmiyyah.com/wp-json/wp/v2/posts?categories=${id}&per_page=100&_embed`);
       const articles = response.data.map((post: any) => {
-        const author = post._embedded?.author?.[0]?.name || "Ilmiyyah";
+        const author = post._embedded?.author?.[0]?.name || "Sinau";
         const featuredImage = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null;
         
         return {
@@ -145,7 +169,7 @@ async function startServer() {
         const category = categories.length > 0 ? categories[0].name : "Umum";
         
         // Find author
-        const author = post._embedded?.author?.[0]?.name || "Ilmiyyah";
+        const author = post._embedded?.author?.[0]?.name || "Sinau";
 
         return {
           id: post.id.toString(),

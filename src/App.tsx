@@ -36,21 +36,21 @@ export default function App() {
   
   // Storage for bookmarks and scroll positions
   const [bookmarks, setBookmarks] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ilmiyyah_bookmarks');
+    const saved = localStorage.getItem('sinau_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
   const [bookBookmarks, setBookBookmarks] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ilmiyyah_book_bookmarks');
+    const saved = localStorage.getItem('sinau_book_bookmarks');
     return saved ? JSON.parse(saved) : [];
   });
 
   const [readingPositions, setReadingPositions] = useState<Record<string, number>>(() => {
-    const saved = localStorage.getItem('ilmiyyah_reading_positions');
+    const saved = localStorage.getItem('sinau_reading_positions');
     return saved ? JSON.parse(saved) : {};
   });
 
   const [lastReadArticlePerBook, setLastReadArticlePerBook] = useState<Record<string, string>>(() => {
-    const saved = localStorage.getItem('ilmiyyah_last_read_articles');
+    const saved = localStorage.getItem('sinau_last_read_articles');
     return saved ? JSON.parse(saved) : {};
   });
 
@@ -64,19 +64,19 @@ export default function App() {
 
   // Save bookmarks to localStorage
   useEffect(() => {
-    localStorage.setItem('ilmiyyah_bookmarks', JSON.stringify(bookmarks));
+    localStorage.setItem('sinau_bookmarks', JSON.stringify(bookmarks));
   }, [bookmarks]);
 
   useEffect(() => {
-    localStorage.setItem('ilmiyyah_book_bookmarks', JSON.stringify(bookBookmarks));
+    localStorage.setItem('sinau_book_bookmarks', JSON.stringify(bookBookmarks));
   }, [bookBookmarks]);
 
   useEffect(() => {
-    localStorage.setItem('ilmiyyah_reading_positions', JSON.stringify(readingPositions));
+    localStorage.setItem('sinau_reading_positions', JSON.stringify(readingPositions));
   }, [readingPositions]);
 
   useEffect(() => {
-    localStorage.setItem('ilmiyyah_last_read_articles', JSON.stringify(lastReadArticlePerBook));
+    localStorage.setItem('sinau_last_read_articles', JSON.stringify(lastReadArticlePerBook));
   }, [lastReadArticlePerBook]);
 
   // Handle scroll position persistence
@@ -338,7 +338,7 @@ export default function App() {
     const isUseful = b.count > 0 && b.slug !== 'uncategorized' && b.slug !== 'e-book';
     
     if (categoryFilter === 'Pilihan') return matchesSearch && isUseful && bookBookmarks.includes(b.id);
-    if (categoryFilter === 'Muallif') return matchesSearch && isUseful && b.muallif && b.muallif !== "Ilmiyyah";
+    if (categoryFilter === 'Muallif') return matchesSearch && isUseful && b.muallif && b.muallif !== "Sinau";
     if (categoryFilter === 'Semua') return matchesSearch && isUseful;
     
     // Simple mapping logic for categories
@@ -426,11 +426,11 @@ export default function App() {
             
             <footer className="mt-40 py-20 border-t border-current/5 text-center space-y-10 opacity-30">
               <div className="inline-flex items-center gap-4 grayscale">
-                <div className="w-10 h-10 border-2 border-current rounded-lg flex items-center justify-center font-black">IL</div>
-                <h4 className="font-display text-2xl font-bold">Ilmiyyah Reader</h4>
+                <div className="w-10 h-10 border-2 border-current rounded-lg flex items-center justify-center font-black">SI</div>
+                <h4 className="font-display text-2xl font-bold">Sinau Reader</h4>
               </div>
               <p className="max-w-md mx-auto text-sm font-serif leading-relaxed italic">
-                Platform baca digital yang dioptimalkan untuk konten-konten ilmiah Ahlussunnah wal Jama'ah.
+                Platform baca digital yang dioptimalkan untuk konten-konten pendidikan dan keilmuan.
               </p>
             </footer>
           </motion.div>

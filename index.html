@@ -3,9 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ilmiyyah Library</title>
+    <title>Sinau Library</title>
     <meta name="theme-color" content="#d4af37" />
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/000000/book.png" />
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluent/192/000000/stack-of-books.png" />
+    <script>
+      // Force unregister all service workers and clear cache storage
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

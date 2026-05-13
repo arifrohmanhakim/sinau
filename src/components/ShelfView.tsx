@@ -38,18 +38,39 @@ export const ShelfView: React.FC<ShelfViewProps> = ({
   const isHomeView = categoryFilter === 'Semua' && !searchQuery;
 
   // Categories to display on Home
-  const displayCategories = ["Pilihan", "Muallif", "Silsilah", "Kitab", "Aqidah", "Ibadah", "Adab", "Bahasa Arab", "Ramadhan"];
+  const displayCategories = [
+    "Pilihan", 
+    "Muallif", 
+    "Silsilah", 
+    "Kitab", 
+    "Aqidah", 
+    "Manhaj", 
+    "Tafsir", 
+    "Hadits", 
+    "Fiqih", 
+    "Adab", 
+    "Bahasa Arab", 
+    "Ramadhan",
+    "Doa & Dzikir",
+    "Sirah & Kisah",
+    "Kesehatan"
+  ];
 
   const getBooksByCategory = (category: string) => {
     const isUseful = (b: Book) => b.count > 0 && b.slug !== 'uncategorized' && b.slug !== 'e-book';
     
     if (category === 'Pilihan') return allBooks.filter(b => isUseful(b) && bookBookmarks.includes(b.id));
-    if (category === 'Muallif') return allBooks.filter(b => isUseful(b) && b.muallif && b.muallif !== "Ilmiyyah");
+    if (category === 'Muallif') return allBooks.filter(b => isUseful(b) && b.muallif && b.muallif !== "Sinau");
     if (category === 'Silsilah') return allBooks.filter(b => isUseful(b) && (b.name.includes('Silsilah') || b.slug.includes('silsilah')));
-    if (category === 'Kitab') return allBooks.filter(b => isUseful(b) && (b.name.includes('Kitab') || b.slug.includes('kitab')));
-    if (category === 'Aqidah') return allBooks.filter(b => isUseful(b) && (b.name.includes('Aqidah') || b.name.includes('Tauhid')));
+    if (category === 'Kitab') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('kitab') || b.slug.toLowerCase().includes('kitab')));
+    if (category === 'Aqidah') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('aqidah') || b.name.toLowerCase().includes('tauhid') || b.name.toLowerCase().includes('iman')));
+    if (category === 'Manhaj') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('manhaj') || b.name.toLowerCase().includes('salaf')));
+    if (category === 'Tafsir') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('tafsir') || b.name.toLowerCase().includes('qur\'an')));
+    if (category === 'Sirah & Kisah') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('sirah') || b.name.toLowerCase().includes('kisah') || b.name.toLowerCase().includes('tarikh')));
+    if (category === 'Adab') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('adab') || b.name.toLowerCase().includes('akhlaq') || b.name.toLowerCase().includes('tazkiyah')));
+    if (category === 'Doa & Dzikir') return allBooks.filter(b => isUseful(b) && (b.name.toLowerCase().includes('doa') || b.name.toLowerCase().includes('dzikir') || b.name.toLowerCase().includes('wirid')));
     
-    return allBooks.filter(b => isUseful(b) && b.name.includes(category));
+    return allBooks.filter(b => isUseful(b) && b.name.toLowerCase().includes(category.toLowerCase()));
   };
 
   return (
