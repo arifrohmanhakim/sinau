@@ -44,25 +44,30 @@ async function startServer() {
         };
       });
 
-      // Try to fetch covers for the most popular books
-      const topBooks = books.filter((b: any) => b.count > 5).slice(0, 20);
+      // Try to fetch covers for more books
+      const topBooks = books.filter((b: any) => b.count > 0).slice(0, 50);
       try {
-        const postPromises = topBooks.map((b: any) => 
-          axios.get(`https://ilmiyyah.com/wp-json/wp/v2/posts?categories=${b.id}&per_page=1&_embed`)
-        );
-        const postResults = await Promise.allSettled(postPromises);
-        
-        postResults.forEach((result, idx) => {
-          if (result.status === 'fulfilled' && result.value.data.length > 0) {
-            const post = result.value.data[0];
-            const img = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
-            if (img) {
-              const bookId = topBooks[idx].id;
-              const book = books.find((b: any) => b.id === bookId);
-              if (book) book.image = img;
+        // Use a smaller batch size to avoid overwhelming the server
+        const batchSize = 10;
+        for (let i = 0; i < topBooks.length; i += batchSize) {
+          const batch = topBooks.slice(i, i + batchSize);
+          const postPromises = batch.map((b: any) => 
+            axios.get(`https://ilmiyyah.com/wp-json/wp/v2/posts?categories=${b.id}&per_page=1&_embed`)
+          );
+          const postResults = await Promise.allSettled(postPromises);
+          
+          postResults.forEach((result, idx) => {
+            if (result.status === 'fulfilled' && result.value.data.length > 0) {
+              const post = result.value.data[0];
+              const img = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+              if (img) {
+                const bookId = batch[idx].id;
+                const book = books.find((b: any) => b.id === bookId);
+                if (book) book.image = img;
+              }
             }
-          }
-        });
+          });
+        }
       } catch (e) {
         console.error("Error fetching covers:", e);
       }
@@ -71,6 +76,35 @@ async function startServer() {
     } catch (error) {
       console.error("Error fetching books:", error);
       res.status(500).json({ error: "Failed to fetch books" });
+    }
+  });
+
+  // API Route to fetch multiple specific articles by IDs
+  app.get("/api/articles/batch", async (req, res) => {
+    const { ids } = req.query;
+    if (!ids) return res.json([]);
+    
+    try {
+      const response = await axios.get(`https://ilmiyyah.com/wp-json/wp/v2/posts?include=${ids}&_embed`);
+      const articles = response.data.map((post: any) => {
+        const author = post._embedded?.author?.[0]?.name || "Ilmiyyah";
+        const featuredImage = post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || null;
+        
+        return {
+          id: post.id.toString(),
+          title: he.decode(post.title.rendered),
+          excerpt: he.decode(post.excerpt.rendered.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...'),
+          content: post.content.rendered,
+          author: author,
+          date: new Date(post.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          readTime: Math.ceil(post.content.rendered.split(' ').length / 200) + " min",
+          image: featuredImage
+        };
+      });
+      res.json(articles);
+    } catch (error) {
+      console.error(`Error fetching batch articles:`, error);
+      res.status(500).json({ error: "Failed to fetch articles" });
     }
   });
 

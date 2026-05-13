@@ -37,6 +37,14 @@
 .markdown-body ul { @apply list-disc list-inside mb-8 space-y-3 font-serif text-lg; }
 .markdown-body ol { @apply list-decimal list-inside mb-8 space-y-3 font-serif text-lg; }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .drop-cap::first-letter {
   @apply text-5xl float-left mr-3 mt-1 text-accent-gold font-bold leading-[0.8];
 }
