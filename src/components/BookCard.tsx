@@ -25,7 +25,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book, theme, isBookmarked, o
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: index * 0.05 }}
       whileHover={{ y: -12 }}
-      className="group flex flex-col text-left"
+      className="group flex flex-col text-left w-full"
     >
       <div className={`aspect-[3/4] w-full rounded-r-[20px] rounded-l-[4px] group-hover:shadow-2xl group-hover:shadow-accent-gold/20 transition-all mb-6 relative overflow-hidden flex flex-col border-y border-r border-current/[0.05] ${bookCardClasses[theme]}`}>
         {book.image ? (
@@ -52,12 +52,12 @@ export const BookCard: React.FC<BookCardProps> = ({ book, theme, isBookmarked, o
         <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/40 to-transparent border-r border-white/5" />
         <div className="absolute left-4 top-0 bottom-0 w-[1px] bg-white/10" />
         
-        <div className="p-6 md:p-8 flex-1 flex flex-col justify-end relative z-10">
-          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-gold mb-2 flex items-center justify-between">
+        <div className="p-4 md:p-8 flex-1 flex flex-col justify-end relative z-10">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-accent-gold mb-2 flex items-center justify-between">
             <span>{book.count} Bab</span>
             {isBookmarked && <BookmarkIcon size={12} fill="currentColor" className="text-accent-gold" />}
           </div>
-          <h3 className="text-xl md:text-2xl font-display font-medium leading-tight line-clamp-4 text-white drop-shadow-lg mb-2">
+          <h3 className="text-lg md:text-2xl font-display font-medium leading-tight line-clamp-3 md:line-clamp-4 text-white drop-shadow-lg mb-2">
             {book.name}
           </h3>
           <div className="text-[9px] uppercase tracking-widest text-white/40 font-bold">

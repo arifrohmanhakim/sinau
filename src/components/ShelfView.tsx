@@ -121,7 +121,7 @@ export const ShelfView: React.FC<ShelfViewProps> = ({
 
                 <div className="flex gap-6 md:gap-10 overflow-x-auto pb-10 scrollbar-hide snap-x -mx-6 px-6 lg:-mx-0 lg:px-0">
                   {categoryBooks.slice(0, 10).map((book, index) => (
-                    <div key={book.id} className="min-w-[260px] md:min-w-[320px] snap-start">
+                    <div key={book.id} className="w-[180px] md:w-[260px] flex-none snap-start">
                       <BookCard 
                         book={book}
                         theme={theme}
@@ -139,12 +139,12 @@ export const ShelfView: React.FC<ShelfViewProps> = ({
                         window.scrollTo(0, 0);
                       }}
                       whileHover={{ scale: 0.98 }}
-                      className="min-w-[220px] md:min-w-[280px] snap-start aspect-[3/4] rounded-2xl bg-current/[0.03] border-2 border-dashed border-current/10 flex flex-col items-center justify-center gap-4 group transition-colors hover:border-accent-gold/30"
+                      className="w-[180px] md:w-[260px] flex-none snap-start aspect-[3/4] rounded-2xl bg-current/[0.03] border-2 border-dashed border-current/10 flex flex-col items-center justify-center gap-4 group transition-colors hover:border-accent-gold/30"
                     >
                       <div className="w-14 h-14 rounded-full bg-current/5 flex items-center justify-center group-hover:bg-accent-gold group-hover:text-black transition-colors">
                         <ArrowRight size={24} />
                       </div>
-                      <span className="text-sm font-bold uppercase tracking-widest opacity-40 group-hover:opacity-100">Lihat Lainnya</span>
+                      <span className="text-sm font-bold uppercase tracking-widest opacity-40 group-hover:opacity-100">Lainnya</span>
                     </motion.button>
                   )}
                 </div>
@@ -179,16 +179,17 @@ export const ShelfView: React.FC<ShelfViewProps> = ({
               <p className="font-display italic opacity-40 text-2xl">Menyusun rak buku...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 md:gap-14">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8 md:gap-12">
               {filteredBooks.map((book, index) => (
-                <BookCard 
-                  key={book.id}
-                  book={book}
-                  theme={theme}
-                  isBookmarked={bookBookmarks.includes(book.id)}
-                  onClick={() => setSelectedBook(book)}
-                  index={index}
-                />
+                <div key={book.id} className="w-full">
+                  <BookCard 
+                    book={book}
+                    theme={theme}
+                    isBookmarked={bookBookmarks.includes(book.id)}
+                    onClick={() => setSelectedBook(book)}
+                    index={index}
+                  />
+                </div>
               ))}
             </div>
           )}
