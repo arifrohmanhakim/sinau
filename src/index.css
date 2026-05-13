@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Merriweather", serif;
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "Inter", sans-serif;
+
+  --color-paper-light: #fdfaf6;
+  --color-paper-sepia: #f4ecd8;
+  --color-paper-dark: #0f0f0f;
+  
+  --color-ink-light: #1a1a1a;
+  --color-ink-sepia: #433422;
+  --color-ink-dark: #e2e2e2;
+
+  --color-accent-gold: #d4af37;
+  --color-surface-dark: #1a1a1a;
+  --color-border-sep: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased selection:bg-accent-gold/20 selection:text-accent-gold;
+  }
+}
+
+.markdown-body h1 { @apply font-display text-4xl md:text-5xl font-bold mb-8 leading-tight; }
+.markdown-body h2 { @apply font-display text-2xl md:text-3xl font-semibold mt-12 mb-6 border-b border-current/10 pb-2; }
+.markdown-body h3 { @apply font-display text-xl md:text-2xl font-medium mt-8 mb-4 opacity-90; }
+.markdown-body p { @apply font-serif text-lg leading-[1.8] mb-8 last:mb-0 transition-all duration-300 cursor-pointer hover:bg-accent-gold/5 rounded px-2 -mx-2; }
+.markdown-body p.reading-active { @apply bg-accent-gold/20 border-l-4 border-accent-gold -ml-4 pl-4; }
+.markdown-body blockquote { @apply border-l-4 border-accent-gold pl-6 italic my-10 text-xl font-serif text-current/90 bg-current/5 py-4 pr-4 rounded-r-lg; }
+
+.category-pill { @apply px-6 py-2 rounded-full border border-current/10 text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap hover:border-accent-gold hover:text-accent-gold; }
+.category-pill.active { @apply bg-accent-gold border-accent-gold text-black shadow-lg shadow-accent-gold/20; }
+.markdown-body ul { @apply list-disc list-inside mb-8 space-y-3 font-serif text-lg; }
+.markdown-body ol { @apply list-decimal list-inside mb-8 space-y-3 font-serif text-lg; }
+
+.drop-cap::first-letter {
+  @apply text-5xl float-left mr-3 mt-1 text-accent-gold font-bold leading-[0.8];
+}
+
